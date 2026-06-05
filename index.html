@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>Wieland Healthcare</title>
+  <style>
+    body { margin:0; padding:0; font-family: "Segoe UI", Arial, sans-serif;
+      background: #f5f5f5; display:flex; justify-content:center; align-items:center;
+      min-height:100vh; }
+    .card { background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.10);
+      max-width:480px; width:90%; text-align:center; overflow:hidden; }
+    .card-header { padding:32px 24px 16px; }
+    .icon { font-size:48px; }
+    .card-header h1 { margin:12px 0 0; font-size:22px; color:#212121; }
+    .card-body { padding:24px; color:#555; font-size:16px; line-height:1.6; }
+    .card-footer { padding:16px 24px 24px; }
+    .btn-close { display:inline-block; padding:10px 28px;
+      color:#fff; border:none; border-radius:6px; font-size:14px; cursor:pointer;
+      text-decoration:none; }
+    .btn-close:hover { opacity:0.85; }
+    .logo { max-width:160px; margin-bottom:12px; }
+    .success .card-header { background:#e8f5e9; }
+    .success .icon { color:#2e7d32; }
+    .success .btn-close { background:#2e7d32; }
+    .fail .card-header { background:#fce4ec; }
+    .fail .icon { color:#c62828; }
+    .fail .btn-close { background:#c62828; }
+  </style>
+</head>
+<body>
+  <div class="card" id="card">
+    <div class="card-header">
+      <img class="logo" src="https://wielandhealthcare.com/wp-content/themes/_tk-1.1/images/wieland-healthcare-logo.png" alt="Wieland Healthcare Logo">
+      <div class="icon" id="icon"></div>
+      <h1 id="title"></h1>
+    </div>
+    <div class="card-body"><p id="message"></p></div>
+    <div class="card-footer">
+      <button class="btn-close" onclick="window.close()">Close This Tab</button>
+    </div>
+  </div>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var success = params.get("success") === "true";
+    var title = params.get("title") || "Unknown";
+    var message = params.get("message") || "";
+
+    document.getElementById("card").classList.add(success ? "success" : "fail");
+    document.getElementById("icon").textContent = success ? "\u2714" : "\u2718";
+    document.getElementById("title").textContent = title;
+    document.getElementById("message").innerHTML = message;
+    document.title = title;
+  </script>
+</body>
+</html>
