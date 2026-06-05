@@ -29,31 +29,53 @@
     .fail .card-header { background:#fce4ec; }
     .fail .icon { color:#c62828; }
     .fail .btn-close { background:#c62828; }
+    .loading .card-header { background:#e3f2fd; }
+    .loading .icon { color:#1565c0; }
+    .loading .btn-close { background:#1565c0; }
+    .spinner { display:inline-block; width:48px; height:48px;
+      border:4px solid #ccc; border-top:4px solid #1565c0;
+      border-radius:50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="card" id="card">
+  <div class="card loading" id="card">
     <div class="card-header">
       <img class="logo" src="https://wielandhealthcare.com/wp-content/themes/_tk-1.1/images/wieland-healthcare-logo.png" alt="Wieland Healthcare Logo">
-      <div class="icon" id="icon"></div>
-      <h1 id="title"></h1>
+      <div class="icon" id="icon"><div class="spinner"></div></div>
+      <h1 id="title">Processing...</h1>
     </div>
-    <div class="card-body"><p id="message"></p></div>
+    <div class="card-body"><p id="message">Please wait while we confirm your response.</p></div>
     <div class="card-footer">
       <button class="btn-close" onclick="window.close()">Close This Tab</button>
     </div>
   </div>
   <script>
-    var params = new URLSearchParams(window.location.search);
-    var success = params.get("success") === "true";
-    var title = params.get("title") || "Unknown";
-    var message = params.get("message") || "";
+    // UPDATE THIS to your latest Apps Script deployment URL
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6eG5j9RSTRXIwYdUtanjMJjJ5I1HYOnBBhHzX_Yc4av_y5no1P60-cSwksUOT-UUDjw/exec";
 
-    document.getElementById("card").classList.add(success ? "success" : "fail");
-    document.getElementById("icon").textContent = success ? "\u2714" : "\u2718";
-    document.getElementById("title").textContent = title;
-    document.getElementById("message").innerHTML = message;
-    document.title = title;
+    var params = new URLSearchParams(window.location.search);
+    var qs = "?board=" + encodeURIComponent(params.get("board") || "")
+           + "&item=" + encodeURIComponent(params.get("item") || "")
+           + "&col=" + encodeURIComponent(params.get("col") || "")
+           + "&label=" + encodeURIComponent(params.get("label") || "")
+           + "&expires=" + encodeURIComponent(params.get("expires") || "")
+           + "&sig=" + encodeURIComponent(params.get("sig") || "");
+
+    fetch(APPS_SCRIPT_URL + qs)
+      .then(function(r) { return r.json(); })
+      .then(function(data) { showResult(data.success, data.title, data.message); })
+      .catch(function(err) { showResult(false, "Error", "Something went wrong. Please try again or contact support."); });
+
+    function showResult(success, title, message) {
+      var card = document.getElementById("card");
+      card.classList.remove("loading");
+      card.classList.add(success ? "success" : "fail");
+      document.getElementById("icon").innerHTML = success ? "\u2714" : "\u2718";
+      document.getElementById("title").textContent = title;
+      document.getElementById("message").innerHTML = message;
+      document.title = title;
+    }
   </script>
 </body>
 </html>
