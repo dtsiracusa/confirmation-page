@@ -29,6 +29,9 @@
     .fail .card-header { background:#fce4ec; }
     .fail .icon { color:#c62828; }
     .fail .btn-close { background:#c62828; }
+    .info .card-header { background:#e3f2fd; }
+    .info .icon { color:#1565c0; }
+    .info .btn-close { background:#1565c0; }
     .loading .card-header { background:#e3f2fd; }
     .loading .icon { color:#1565c0; }
     .loading .btn-close { background:#1565c0; }
@@ -80,8 +83,9 @@
     function showResult(success, title, message) {
       var card = document.getElementById("card");
       card.classList.remove("loading");
-      card.classList.add(success ? "success" : "fail");
-      document.getElementById("icon").innerHTML = success ? "\u2714" : "\u2718";
+      var isInfo = (!success && title === "Already Confirmed");
+      card.classList.add(success ? "success" : (isInfo ? "info" : "fail"));
+      document.getElementById("icon").innerHTML = success ? "\u2714" : (isInfo ? "\u2139" : "\u2718");
       document.getElementById("title").textContent = title;
       document.getElementById("message").innerHTML = message;
       document.title = title;
