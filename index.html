@@ -62,10 +62,16 @@
            + "&expires=" + encodeURIComponent(params.get("expires") || "")
            + "&sig=" + encodeURIComponent(params.get("sig") || "");
 
-    fetch(APPS_SCRIPT_URL + qs)
-      .then(function(r) { return r.json(); })
-      .then(function(data) { showResult(data.success, data.title, data.message); })
-      .catch(function(err) { showResult(false, "Error", "Something went wrong. Please try again or contact support."); });
+    function handleResponse(data) {
+      showResult(data.success, data.title, data.message);
+    }
+
+    var script = document.createElement('script');
+    script.src = APPS_SCRIPT_URL + qs + '&callback=handleResponse';
+    script.onerror = function() {
+      showResult(false, "Error", "Something went wrong. Please try again or contact support.");
+    };
+    document.body.appendChild(script);
 
     function showResult(success, title, message) {
       var card = document.getElementById("card");
