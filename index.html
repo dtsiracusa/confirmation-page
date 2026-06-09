@@ -63,12 +63,16 @@
            + "&sig=" + encodeURIComponent(params.get("sig") || "");
 
     function handleResponse(data) {
+      console.log("JSONP response received:", JSON.stringify(data));
       showResult(data.success, data.title, data.message);
     }
 
     var script = document.createElement('script');
     script.src = APPS_SCRIPT_URL + qs + '&callback=handleResponse';
-    script.onerror = function() {
+    console.log("JSONP request URL:", script.src);
+    script.onload = function() { console.log("Script tag loaded"); };
+    script.onerror = function(e) {
+      console.log("Script tag onerror fired", e);
       showResult(false, "Error", "Something went wrong. Please try again or contact support.");
     };
     document.body.appendChild(script);
