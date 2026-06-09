@@ -52,7 +52,7 @@
   </div>
   <script>
     // UPDATE THIS to your latest Apps Script deployment URL
-    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6eG5j9RSTRXIwYdUtanjMJjJ5I1HYOnBBhHzX_Yc4av_y5no1P60-cSwksUOT-UUDjw/exec";
+    var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZqPlOHKqIcS3A6VsGNEyHB2o_tCKNqpSYq8Ye96H1jodvU-GEAT_qZldaeXLiu0XhbA/exec";
 
     var params = new URLSearchParams(window.location.search);
     var qs = "?board=" + encodeURIComponent(params.get("board") || "")
@@ -68,7 +68,7 @@
     }
 
     var script = document.createElement('script');
-    script.src = APPS_SCRIPT_URL + qs + '&callback=handleResponse';
+    script.src = APPS_SCRIPT_URL + qs;
     console.log("JSONP request URL:", script.src);
     script.onload = function() { console.log("Script tag loaded"); };
     script.onerror = function(e) {
