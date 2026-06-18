@@ -58,12 +58,7 @@
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5uelWoB54fXlzEnWIOXiv5KoijhXq12xiapz_TZmyxJnBdnWNv6De5RBwpPLp6Z0_UA/exec";
 
     var params = new URLSearchParams(window.location.search);
-    var qs = "?board=" + encodeURIComponent(params.get("board") || "")
-           + "&item=" + encodeURIComponent(params.get("item") || "")
-           + "&col=" + encodeURIComponent(params.get("col") || "")
-           + "&label=" + encodeURIComponent(params.get("label") || "")
-           + "&expires=" + encodeURIComponent(params.get("expires") || "")
-           + "&sig=" + encodeURIComponent(params.get("sig") || "");
+    var qs = window.location.search;  // includes leading "?", forwards ?t=... or any other params verbatim
 
     function handleResponse(data) {
       console.log("JSONP response received:", JSON.stringify(data));
