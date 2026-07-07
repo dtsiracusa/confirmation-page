@@ -113,17 +113,25 @@
         title, message, true);
     }
 
-    function setState(cls, iconHtml, title, message, showCloseNote) {
+    function tryClose() {
+      window.close();
+      // If the browser refused (tab wasn't script-closable), fall back to the note
+      setTimeout(function () {
+        document.getElementById("closeBtn").style.display = "none";
+        document.getElementById("footerNote").style.display = "block";
+      }, 300);
+    }
+
+    function setState(cls, iconHtml, title, message, showClose) {
       var card = document.getElementById("card");
       card.className = "card " + cls;
       document.getElementById("icon").innerHTML = iconHtml;
       document.getElementById("title").textContent = title;
-      // H5: textContent, not innerHTML — server messages are plain text (see A6).
       document.getElementById("message").textContent = message;
       document.title = title + " — Wieland Healthcare";
-      // H6: no window.close() button — browsers block it for tabs they didn't open.
       document.getElementById("actionBtn").style.display = (cls === "ready") ? "inline-block" : "none";
-      document.getElementById("footerNote").style.display = showCloseNote ? "block" : "none";
+      document.getElementById("closeBtn").style.display = showClose ? "inline-block" : "none";
+      document.getElementById("footerNote").style.display = "none";
     }
   </script>
 </body>
