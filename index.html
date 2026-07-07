@@ -3,13 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <title>Wieland Healthcare</title>
+  <title>Wieland Healthcare — Order Confirmation</title>
   <style>
-    body { margin:0; padding:0; font-family: "Segoe UI", Arial, sans-serif;
-      background: #f5f5f5; display:flex; justify-content:center; align-items:center;
+    body { margin:0; padding:0; font-family:"Segoe UI", Arial, sans-serif;
+      background:#f5f5f5; display:flex; justify-content:center; align-items:center;
       min-height:100vh; }
     .card { background:#fff; border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.10);
       max-width:480px; width:90%; text-align:center; overflow:hidden; }
@@ -18,71 +15,112 @@
     .card-header h1 { margin:12px 0 0; font-size:22px; color:#212121; }
     .card-body { padding:24px; color:#555; font-size:24px; line-height:1.6; }
     .card-footer { padding:16px 24px 24px; }
-    .btn-close { display:inline-block; padding:10px 28px;
-      color:#fff; border:none; border-radius:6px; font-size:14px; cursor:pointer;
-      text-decoration:none; }
-    .btn-close:hover { opacity:0.85; }
+    .btn { display:inline-block; padding:12px 32px; color:#fff; border:none;
+      border-radius:6px; font-size:16px; cursor:pointer; text-decoration:none; }
+    .btn:hover { opacity:0.85; }
+    .btn:disabled { opacity:0.5; cursor:default; }
+    .footer-note { color:#888; font-size:14px; margin:8px 0 0; display:none; }
     .logo { max-width:160px; margin-bottom:12px; }
-    .success .card-header { background:#e8f5e9; }
-    .success .icon { color:#2e7d32; }
-    .success .btn-close { background:#2e7d32; }
-    .fail .card-header { background:#fce4ec; }
-    .fail .icon { color:#c62828; }
-    .fail .btn-close { background:#c62828; }
-    .info .card-header { background:#e3f2fd; }
-    .info .icon { color:#1565c0; }
-    .info .btn-close { background:#1565c0; }
-    .loading .card-header { background:#e3f2fd; }
-    .loading .icon { color:#1565c0; }
-    .loading .btn-close { background:#1565c0; }
+    .ready .card-header   { background:#e3f2fd; } .ready .icon   { color:#1565c0; } .ready .btn   { background:#1565c0; }
+    .loading .card-header { background:#e3f2fd; } .loading .icon { color:#1565c0; }
+    .success .card-header { background:#e8f5e9; } .success .icon { color:#2e7d32; }
+    .info .card-header    { background:#e3f2fd; } .info .icon    { color:#1565c0; }
+    .fail .card-header    { background:#fce4ec; } .fail .icon    { color:#c62828; }
     .spinner { display:inline-block; width:48px; height:48px;
       border:4px solid #ccc; border-top:4px solid #1565c0;
-      border-radius:50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+      border-radius:50%; animation:spin 0.8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="card loading" id="card">
+  <div class="card ready" id="card">
     <div class="card-header">
-      <img class="logo" src="https://wielandhealthcare.com/wp-content/themes/_tk-1.1/images/wieland-healthcare-logo.png" alt="Wieland Healthcare Logo">
-      <div class="icon" id="icon"><div class="spinner"></div></div>
-      <h1 id="title">Processing...</h1>
+      <!-- H7: commit logo.png to this repo (same folder as this file) instead of
+           hotlinking the WordPress theme path, which breaks when the site theme updates. -->
+      <img class="logo" src="logo.png" alt="Wieland Healthcare Logo">
+      <div class="icon" id="icon">&#128203;</div>
+      <h1 id="title">Confirm Your Order</h1>
     </div>
-    <div class="card-body"><p id="message">Please wait while we confirm your response.</p></div>
+    <div class="card-body">
+      <p id="message">Please click the button below to confirm your order with Wieland Healthcare.</p>
+    </div>
     <div class="card-footer">
-      <button class="btn-close" onclick="window.close()">Close This Tab</button>
+      <button class="btn" id="actionBtn" onclick="confirmOrder()">Confirm Order</button>
+      <p class="footer-note" id="footerNote">You may now close this tab.</p>
     </div>
   </div>
+
   <script>
-    // UPDATE THIS to your latest Apps Script deployment URL
+    // UPDATE THIS to your latest Apps Script deployment URL.
+    // (Redeploy via Manage deployments > Edit > New version so this URL never changes.)
     var APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzbjmtwGt667uFj7eTLeJ-UJTpB9YVPHmj4TO-KnQncjIKdWh3_SWQsTX1DDMJ6hf6LtA/exec";
+    var TIMEOUT_MS = 15000;          // H2: give up waiting after 15 seconds
 
-    var qs = window.location.search;  // includes leading "?", forwards ?t=... or any other params verbatim
+    // H4: extract only the token; do not forward arbitrary query params.
+    var params = new URLSearchParams(window.location.search);
+    var token = params.get("t");
 
-    function handleResponse(data) {
-      console.log("JSONP response received:", JSON.stringify(data));
-      showResult(data.success, data.title, data.message);
+    var responded = false;           // H8: ignore late/duplicate JSONP callbacks
+    var timer = null;
+
+    // H3: no token -> explain instead of showing a confirm button that can't work.
+    if (!token) {
+      setState("fail", "\u2718", "Link Problem",
+        "This confirmation link is incomplete. Please try clicking the link in your " +
+        "email again, or contact us and we'll be happy to help.", false);
     }
 
-    var script = document.createElement('script');
-    script.src = APPS_SCRIPT_URL + qs;
-    console.log("JSONP request URL:", script.src);
-    script.onload = function() { console.log("Script tag loaded"); };
-    script.onerror = function(e) {
-      console.log("Script tag onerror fired", e);
-      showResult(false, "Error", "Something went wrong. Please try again or contact support.");
-    };
-    document.body.appendChild(script);
+    // H1: the Apps Script call only happens on an explicit human click,
+    // so email-security bots that pre-visit the link cannot consume the token.
+    function confirmOrder() {
+      document.getElementById("actionBtn").disabled = true;
+      setState("loading", '<div class="spinner"></div>', "Processing...",
+        "Please wait while we confirm your order.", false);
 
-    function showResult(success, title, message) {
-      var card = document.getElementById("card");
-      card.classList.remove("loading");
+      var script = document.createElement("script");
+      script.src = APPS_SCRIPT_URL + "?t=" + encodeURIComponent(token);
+      script.onerror = function () {
+        finish(false, "Error",
+          "We couldn't reach the confirmation service. Please try clicking the link " +
+          "in your email again in a few minutes, or reply to your confirmation email " +
+          "and we'll process it manually.");
+      };
+      document.body.appendChild(script);
+
+      timer = setTimeout(function () {
+        finish(false, "Taking Too Long",
+          "The confirmation service didn't respond. Please try clicking the link " +
+          "in your email again in a few minutes, or reply to your confirmation email " +
+          "and we'll process it manually.");
+      }, TIMEOUT_MS);
+    }
+
+    // JSONP callback — Apps Script wraps its reply as handleResponse({success, title, message})
+    function handleResponse(data) {
+      finish(data.success, data.title, data.message);
+    }
+
+    function finish(success, title, message) {
+      if (responded) return;         // H8
+      responded = true;
+      if (timer) clearTimeout(timer);
       var isInfo = (!success && title === "Already Confirmed");
-      card.classList.add(success ? "success" : (isInfo ? "info" : "fail"));
-      document.getElementById("icon").innerHTML = success ? "\u2714" : (isInfo ? "\u2139" : "\u2718");
+      setState(success ? "success" : (isInfo ? "info" : "fail"),
+        success ? "\u2714" : (isInfo ? "\u2139" : "\u2718"),
+        title, message, true);
+    }
+
+    function setState(cls, iconHtml, title, message, showCloseNote) {
+      var card = document.getElementById("card");
+      card.className = "card " + cls;
+      document.getElementById("icon").innerHTML = iconHtml;
       document.getElementById("title").textContent = title;
-      document.getElementById("message").innerHTML = message;
-      document.title = title;
+      // H5: textContent, not innerHTML — server messages are plain text (see A6).
+      document.getElementById("message").textContent = message;
+      document.title = title + " — Wieland Healthcare";
+      // H6: no window.close() button — browsers block it for tabs they didn't open.
+      document.getElementById("actionBtn").style.display = (cls === "ready") ? "inline-block" : "none";
+      document.getElementById("footerNote").style.display = showCloseNote ? "block" : "none";
     }
   </script>
 </body>
