@@ -104,6 +104,21 @@
       finish(data.success, data.title, data.message);
     }
 
+    // Renders a message allowing ONLY <strong> for bolding.
+    // Everything is inserted as text nodes, so no other HTML can execute.
+    function setMessage(el, message) {
+      el.textContent = "";
+      var parts = String(message).split(/<\/?strong\s*>/i);
+      for (var i = 0; i < parts.length; i++) {
+        if (i % 2 === 1) {
+          var b = document.createElement("strong");
+          b.textContent = parts[i];
+          el.appendChild(b);
+        } else {
+          el.appendChild(document.createTextNode(parts[i]));
+        }
+      }
+    }
     function finish(success, title, message) {
       if (responded) return;         // H8
       responded = true;
