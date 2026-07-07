@@ -143,7 +143,7 @@
       card.className = "card " + cls;
       document.getElementById("icon").innerHTML = iconHtml;
       document.getElementById("title").textContent = title;
-      document.getElementById("message").textContent = message;
+      setMessage(document.getElementById("message"), message);
       document.title = title + " — Wieland Healthcare";
       document.getElementById("actionBtn").style.display = (cls === "ready") ? "inline-block" : "none";
       document.getElementById("closeBtn").style.display = showClose ? "inline-block" : "none";
