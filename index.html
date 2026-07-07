@@ -18,6 +18,9 @@
     .btn { display:inline-block; padding:12px 32px; color:#fff; border:none;
       border-radius:6px; font-size:16px; cursor:pointer; text-decoration:none; }
     .btn:hover { opacity:0.85; }
+    .success .btn { background:#2e7d32; }
+    .info .btn    { background:#1565c0; }
+    .fail .btn    { background:#c62828; }
     .btn:disabled { opacity:0.5; cursor:default; }
     .footer-note { color:#888; font-size:14px; margin:8px 0 0; display:none; }
     .logo { max-width:160px; margin-bottom:12px; }
@@ -46,9 +49,9 @@
     </div>
     <div class="card-footer">
       <button class="btn" id="actionBtn" onclick="confirmOrder()">Confirm Order</button>
-      <p class="footer-note" id="footerNote">You may now close this tab.</p>
+      <button class="btn" id="closeBtn" style="display:none;" onclick="tryClose()">Close This Tab</button>
+      <p class="footer-note" id="footerNote" style="display:none;">You may now close this tab.</p>
     </div>
-  </div>
 
   <script>
     // UPDATE THIS to your latest Apps Script deployment URL.
