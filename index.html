@@ -104,18 +104,21 @@
       finish(data.success, data.title, data.message);
     }
 
-    // Renders a message allowing ONLY <strong> for bolding.
+    // Renders a message allowing ONLY <strong> for bolding and \n for line breaks.
     // Everything is inserted as text nodes, so no other HTML can execute.
     function setMessage(el, message) {
       el.textContent = "";
       var parts = String(message).split(/<\/?strong\s*>/i);
       for (var i = 0; i < parts.length; i++) {
+        var target = el;
         if (i % 2 === 1) {
-          var b = document.createElement("strong");
-          b.textContent = parts[i];
-          el.appendChild(b);
-        } else {
-          el.appendChild(document.createTextNode(parts[i]));
+          target = document.createElement("strong");
+          el.appendChild(target);
+        }
+        var lines = parts[i].split("\n");
+        for (var j = 0; j < lines.length; j++) {
+          if (j > 0) target.appendChild(document.createElement("br"));
+          target.appendChild(document.createTextNode(lines[j]));
         }
       }
     }
