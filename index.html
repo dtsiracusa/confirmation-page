@@ -303,6 +303,7 @@
     // Save validates only filled fields (no field is required), stores the
     // values, then relabels the close button. It does NOT push yet (Option A).
     function saveContacts() {
+      if (!document.getElementById("saveContactsBtn").classList.contains("active")) return;
       var osPhone = document.getElementById("osPhone").value.trim();
       var osEmail = document.getElementById("osEmail").value.trim();
       var buPhone = document.getElementById("buPhone").value.trim();
