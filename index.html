@@ -215,6 +215,12 @@
     }
 
     function tryClose() {
+      // Option A: if contacts were saved in the modal, this button is now
+      // "Submit and Close" — push to Monday.com first, then close.
+      if (pendingContacts) {
+        submitContactsAndClose();
+        return;
+      }
       window.close();
       // If the browser refused (tab wasn't script-closable), fall back to the note
       setTimeout(function () {
