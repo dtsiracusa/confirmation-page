@@ -234,6 +234,54 @@
     // ---------- On-Site Contacts modal ----------
     function openContactsModal() {
       document.getElementById("contactsModal").classList.add("open");
+      evaluateContactsForm(); // set Save's initial (greyed) state
+    }
+    // Live US phone mask: "(555) 555-5555" as the user types.
+    function formatUSPhone(value) {
+      var d = value.replace(/[^0-9]/g, "");
+      if (d.length === 11 && d.charAt(0) === "1") d = d.slice(1);
+      d = d.slice(0, 10);
+      if (d.length > 6) return "(" + d.slice(0,3) + ") " + d.slice(3,6) + "-" + d.slice(6);
+      if (d.length > 3) return "(" + d.slice(0,3) + ") " + d.slice(3);
+      if (d.length > 0) return "(" + d.slice(0,3);
+      return "";
+    }
+    function onPhoneInput(input) {
+      input.value = formatUSPhone(input.value);
+      evaluateContactsForm();
+    }
+    // Turns Save green when at least one field is validly filled AND no filled
+    // field is invalid. Runs on every keystroke. Red inline errors are still
+    // only shown on the Save click (in saveContacts), to avoid nagging mid-type.
+    function evaluateContactsForm() {
+      var osPhone = document.getElementById("osPhone").value.trim();
+      var osEmail = document.getElementById("osEmail").value.trim();
+      var buPhone = document.getElementById("buPhone").value.trim();
+      var buEmail = document.getElementById("buEmail").value.trim();
+      var osName = document.getElementById("osName").value.trim();
+      var osExt  = document.getElementById("osExt").value.trim();
+      var buName = document.getElementById("buName").value.trim();
+      var buExt  = document.getElementById("buExt").value.trim();
+
+      var osPhoneOk = osPhone === "" || isValidUSPhone(osPhone);
+      var osEmailOk = osEmail === "" || isValidEmail(osEmail);
+      var buPhoneOk = buPhone === "" || isValidUSPhone(buPhone);
+      var buEmailOk = buEmail === "" || isValidEmail(buEmail);
+
+      var anyValidFilled =
+        !!osName || !!osExt || !!buName || !!buExt ||
+        (osPhone !== "" && osPhoneOk) ||
+        (osEmail !== "" && osEmailOk) ||
+        (buPhone !== "" && buPhoneOk) ||
+        (buEmail !== "" && buEmailOk);
+
+      var noInvalid = osPhoneOk && osEmailOk && buPhoneOk && buEmailOk;
+      var enabled = anyValidFilled && noInvalid;
+
+      var btn = document.getElementById("saveContactsBtn");
+      if (enabled) btn.classList.add("active");
+      else btn.classList.remove("active");
+      return enabled;
     }
     function closeContactsModal() {
       document.getElementById("contactsModal").classList.remove("open");
