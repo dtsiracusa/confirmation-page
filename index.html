@@ -33,6 +33,29 @@
       border:4px solid #ccc; border-top:4px solid #1565c0;
       border-radius:50%; animation:spin 0.8s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
+    /* On-Site Contacts modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.45);
+      display:none; justify-content:center; align-items:flex-start; overflow-y:auto; z-index:1000; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#fff; border-radius:12px; max-width:460px; width:92%;
+      margin:32px auto; text-align:left; box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+    .modal h2 { margin:0; padding:20px 24px; font-size:18px; color:#212121; border-bottom:1px solid #eee; }
+    .modal-body { padding:16px 24px; }
+    .modal-body h3 { font-size:14px; color:#1565c0; margin:16px 0 8px; }
+    .modal-body h3:first-child { margin-top:0; }
+    .field { margin-bottom:10px; }
+    .field label { display:block; font-size:13px; color:#555; margin-bottom:3px; }
+    .field input { width:100%; box-sizing:border-box; padding:8px 10px; font-size:14px;
+      border:1px solid #ccc; border-radius:5px; }
+    .field input.invalid { border-color:#c62828; background:#fff5f5; }
+    .field .err { color:#c62828; font-size:12px; margin-top:3px; display:none; }
+    .field .err.show { display:block; }
+    .phone-row { display:flex; gap:8px; }
+    .phone-row .phone-num { flex:2; }
+    .phone-row .phone-ext { flex:1; }
+    .modal-footer { padding:16px 24px 20px; text-align:right; border-top:1px solid #eee; }
+    .modal-footer .btn { font-size:15px; padding:10px 22px; }
+    .btn-secondary { background:#9e9e9e !important; margin-right:8px; }
   </style>
 </head>
 <body>
