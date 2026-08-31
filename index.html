@@ -255,34 +255,30 @@
       input.value = formatUSPhone(input.value);
       evaluateContactsForm();
     }
-    // Turns Save green when at least one field is validly filled AND no filled
-    // field is invalid. Runs on every keystroke. Red inline errors are still
-    // only shown on the Save click (in saveContacts), to avoid nagging mid-type.
+    // Evaluates one contact block ("os" or "bu") against the rule:
+    // a valid contact needs a Name AND (Phone OR Email), each in valid format.
+    function evaluateBlock(prefix) {
+      var name  = document.getElementById(prefix + "Name").value.trim();
+      var phone = document.getElementById(prefix + "Phone").value.trim();
+      var ext   = document.getElementById(prefix + "Ext").value.trim();
+      var email = document.getElementById(prefix + "Email").value.trim();
+      var phoneOk = phone === "" || isValidUSPhone(phone);
+      var emailOk = email === "" || isValidEmail(email);
+      var filled    = !!name || !!phone || !!ext || !!email;
+      var hasMethod = !!phone || !!email;
+      var complete  = !!name && hasMethod && phoneOk && emailOk;
+      return { name: name, phone: phone, email: email, ext: ext,
+               phoneOk: phoneOk, emailOk: emailOk,
+               filled: filled, hasMethod: hasMethod, complete: complete };
+    }
+    // Save turns green only when: at least one block is complete, AND any block
+    // that has data is complete. (Red inline errors stay deferred to Save click.)
     function evaluateContactsForm() {
-      var osPhone = document.getElementById("osPhone").value.trim();
-      var osEmail = document.getElementById("osEmail").value.trim();
-      var buPhone = document.getElementById("buPhone").value.trim();
-      var buEmail = document.getElementById("buEmail").value.trim();
-      var osName = document.getElementById("osName").value.trim();
-      var osExt  = document.getElementById("osExt").value.trim();
-      var buName = document.getElementById("buName").value.trim();
-      var buExt  = document.getElementById("buExt").value.trim();
-
-      var osPhoneOk = osPhone === "" || isValidUSPhone(osPhone);
-      var osEmailOk = osEmail === "" || isValidEmail(osEmail);
-      var buPhoneOk = buPhone === "" || isValidUSPhone(buPhone);
-      var buEmailOk = buEmail === "" || isValidEmail(buEmail);
-
-      var anyValidFilled =
-        !!osName || !!osExt || !!buName || !!buExt ||
-        (osPhone !== "" && osPhoneOk) ||
-        (osEmail !== "" && osEmailOk) ||
-        (buPhone !== "" && buPhoneOk) ||
-        (buEmail !== "" && buEmailOk);
-
-      var noInvalid = osPhoneOk && osEmailOk && buPhoneOk && buEmailOk;
-      var enabled = anyValidFilled && noInvalid;
-
+      var os = evaluateBlock("os");
+      var bu = evaluateBlock("bu");
+      var osOk = !os.filled || os.complete;   // empty is fine; if touched it must be complete
+      var buOk = !bu.filled || bu.complete;
+      var enabled = (os.complete || bu.complete) && osOk && buOk;
       var btn = document.getElementById("saveContactsBtn");
       if (enabled) btn.classList.add("active");
       else btn.classList.remove("active");
