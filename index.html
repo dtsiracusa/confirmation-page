@@ -228,7 +228,22 @@
       card.className = "card " + cls;
       document.getElementById("icon").innerHTML = iconHtml;
       document.getElementById("title").textContent = title;
-      setMessage(document.getElementById("message"), message);
+      var CONTACTS_MARKER = "[[CONTACTS_BUTTON]]";
+      var msgEl   = document.getElementById("message");
+      var msg2El  = document.getElementById("message2");
+      var btnWrap = document.getElementById("contactsButtonWrap");
+      if (message.indexOf(CONTACTS_MARKER) !== -1) {
+        var halves = message.split(CONTACTS_MARKER);
+        setMessage(msgEl, halves[0].replace(/\n+$/, ""));
+        setMessage(msg2El, (halves[1] || "").replace(/^\n+/, ""));
+        msg2El.style.display = "block";
+        btnWrap.style.display = "block";
+      } else {
+        setMessage(msgEl, message);
+        msg2El.style.display = "none";
+        msg2El.textContent = "";
+        btnWrap.style.display = "none";
+      }
       document.title = title + " — Wieland Healthcare";
       document.getElementById("actionBtn").style.display = (cls === "ready") ? "inline-block" : "none";
       document.getElementById("closeBtn").style.display = showClose ? "inline-block" : "none";
