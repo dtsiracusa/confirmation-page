@@ -303,28 +303,32 @@
     }
     // Save validates only filled fields (no field is required), then pushes the
     // contacts to Monday.com and closes the tab in one step ("Save and Close").
+    // Shows/hides the "name + phone/email" rule error for one block.
+    function showComboError(prefix, b) {
+      var invalid = b.filled && !(b.name && b.hasMethod);
+      var input = document.getElementById(prefix + "Name");
+      var err = document.getElementById(prefix + "ComboErr");
+      if (invalid) { input.classList.add("invalid"); err.classList.add("show"); }
+      else { input.classList.remove("invalid"); err.classList.remove("show"); }
+    }
     function saveContacts() {
-      if (!document.getElementById("saveContactsBtn").classList.contains("active")) return;
-      var osPhone = document.getElementById("osPhone").value.trim();
-      var osEmail = document.getElementById("osEmail").value.trim();
-      var buPhone = document.getElementById("buPhone").value.trim();
-      var buEmail = document.getElementById("buEmail").value.trim();
-      var ok = true;
-      ok = validateField("osPhone", "osPhoneErr", osPhone === "" || isValidUSPhone(osPhone)) && ok;
-      ok = validateField("osEmail", "osEmailErr", osEmail === "" || isValidEmail(osEmail)) && ok;
-      ok = validateField("buPhone", "buPhoneErr", buPhone === "" || isValidUSPhone(buPhone)) && ok;
-      ok = validateField("buEmail", "buEmailErr", buEmail === "" || isValidEmail(buEmail)) && ok;
-      if (!ok) return;
-
+      var os = evaluateBlock("os");
+      var bu = evaluateBlock("bu");
+      // Surface format errors on any filled phone/email.
+      validateField("osPhone", "osPhoneErr", os.phoneOk);
+      validateField("osEmail", "osEmailErr", os.emailOk);
+      validateField("buPhone", "buPhoneErr", bu.phoneOk);
+      validateField("buEmail", "buEmailErr", bu.emailOk);
+      // Surface the name + phone/email rule per block.
+      showComboError("os", os);
+      showComboError("bu", bu);
+      // Enforce: at least one complete block, and every filled block complete.
+      var osOk = !os.filled || os.complete;
+      var buOk = !bu.filled || bu.complete;
+      if (!((os.complete || bu.complete) && osOk && buOk)) return;
       pendingContacts = {
-        osName:  document.getElementById("osName").value.trim(),
-        osPhone: osPhone,
-        osExt:   document.getElementById("osExt").value.trim(),
-        osEmail: osEmail,
-        buName:  document.getElementById("buName").value.trim(),
-        buPhone: buPhone,
-        buExt:   document.getElementById("buExt").value.trim(),
-        buEmail: buEmail
+        osName: os.name,  osPhone: os.phone, osExt: os.ext, osEmail: os.email,
+        buName: bu.name,  buPhone: bu.phone, buExt: bu.ext, buEmail: bu.email
       };
       closeContactsModal();
       submitContactsAndClose();
