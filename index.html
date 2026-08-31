@@ -272,10 +272,13 @@
                filled: filled, hasMethod: hasMethod, complete: complete };
     }
     // Save turns green only when: at least one block is complete, AND any block
-    // that has data is complete. (Red inline errors stay deferred to Save click.)
+    // that has data is complete. Red inline errors now render live here, gated
+    // so a half-typed field isn't nagged (see renderBlockErrors).
     function evaluateContactsForm() {
       var os = evaluateBlock("os");
       var bu = evaluateBlock("bu");
+      renderBlockErrors("os", os, false);   // live: gate format errors, show combo live
+      renderBlockErrors("bu", bu, false);
       var osOk = !os.filled || os.complete;   // empty is fine; if touched it must be complete
       var buOk = !bu.filled || bu.complete;
       var enabled = (os.complete || bu.complete) && osOk && buOk;
