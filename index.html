@@ -311,6 +311,26 @@
       if (invalid) { input.classList.add("invalid"); err.classList.add("show"); }
       else { input.classList.remove("invalid"); err.classList.remove("show"); }
     }
+    // A field's format error is only "ripe" to show once the field looks
+    // finished, so we don't nag a half-typed entry. The phone mask caps input
+    // at 10 digits, so a phone is either still being typed (1–9 digits) or
+    // already valid (10) — it never reaches an "invalid but finished" state on
+    // input, so its format error effectively only surfaces at Save (force).
+    function phoneLooksDone(v) {
+      return v.replace(/[^0-9]/g, "").length === 10;
+    }
+    function emailLooksDone(v) {
+      return /@.+\..+/.test(v);
+    }
+    // Single place that renders a block's red errors, shared by the live path
+    // (force = false, gated by *LooksDone) and Save (force = true, show all).
+    function renderBlockErrors(prefix, b, force) {
+      var showPhone = b.phone !== "" && (force || phoneLooksDone(b.phone));
+      var showEmail = b.email !== "" && (force || emailLooksDone(b.email));
+      validateField(prefix + "Phone", prefix + "PhoneErr", showPhone ? b.phoneOk : true);
+      validateField(prefix + "Email", prefix + "EmailErr", showEmail ? b.emailOk : true);
+      showComboError(prefix, b);
+    }
     function saveContacts() {
       var os = evaluateBlock("os");
       var bu = evaluateBlock("bu");
