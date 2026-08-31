@@ -146,6 +146,7 @@
     var token = params.get("t");
 
     var responded = false;           // H8: ignore late/duplicate JSONP callbacks
+    var pendingContacts = null;      // Holds saved contacts until "Submit and Close" pushes them
     var timer = null;
 
     // H3: no token -> explain instead of showing a confirm button that can't work.
