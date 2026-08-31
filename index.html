@@ -220,8 +220,8 @@
     }
 
     function tryClose() {
-      // Option A: if contacts were saved in the modal, this button is now
-      // "Submit and Close" — push to Monday.com first, then close.
+      // Retry path: if a Save-and-Close push failed, pendingContacts is still
+      // set, so this button re-attempts the push before closing.
       if (pendingContacts) {
         submitContactsAndClose();
         return;
