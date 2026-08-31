@@ -229,6 +229,108 @@
       }, 300);
     }
 
+    // ---------- On-Site Contacts modal ----------
+    function openContactsModal() {
+      document.getElementById("contactsModal").classList.add("open");
+    }
+    function closeContactsModal() {
+      document.getElementById("contactsModal").classList.remove("open");
+    }
+    function isValidUSPhone(v) {
+      var d = v.replace(/[^0-9]/g, "");
+      return d.length === 10 || (d.length === 11 && d.charAt(0) === "1");
+    }
+    function isValidEmail(v) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+    }
+    function validateField(inputId, errId, valid) {
+      var input = document.getElementById(inputId);
+      var err = document.getElementById(errId);
+      if (valid) { input.classList.remove("invalid"); err.classList.remove("show"); }
+      else { input.classList.add("invalid"); err.classList.add("show"); }
+      return valid;
+    }
+    // Save validates only filled fields (no field is required), stores the
+    // values, then relabels the close button. It does NOT push yet (Option A).
+    function saveContacts() {
+      var osPhone = document.getElementById("osPhone").value.trim();
+      var osEmail = document.getElementById("osEmail").value.trim();
+      var buPhone = document.getElementById("buPhone").value.trim();
+      var buEmail = document.getElementById("buEmail").value.trim();
+      var ok = true;
+      ok = validateField("osPhone", "osPhoneErr", osPhone === "" || isValidUSPhone(osPhone)) && ok;
+      ok = validateField("osEmail", "osEmailErr", osEmail === "" || isValidEmail(osEmail)) && ok;
+      ok = validateField("buPhone", "buPhoneErr", buPhone === "" || isValidUSPhone(buPhone)) && ok;
+      ok = validateField("buEmail", "buEmailErr", buEmail === "" || isValidEmail(buEmail)) && ok;
+      if (!ok) return;
+
+      pendingContacts = {
+        osName:  document.getElementById("osName").value.trim(),
+        osPhone: osPhone,
+        osExt:   document.getElementById("osExt").value.trim(),
+        osEmail: osEmail,
+        buName:  document.getElementById("buName").value.trim(),
+        buPhone: buPhone,
+        buExt:   document.getElementById("buExt").value.trim(),
+        buEmail: buEmail
+      };
+      closeContactsModal();
+      var closeBtn = document.getElementById("closeBtn");
+      closeBtn.textContent = "Submit and Close";
+      closeBtn.style.display = "inline-block";
+    }
+    // Pushes the saved contacts to Apps Script via JSONP, then closes the tab.
+    var contactsResponded = false;
+    var contactsTimer = null;
+    function submitContactsAndClose() {
+      var btn = document.getElementById("closeBtn");
+      btn.disabled = true;
+      btn.textContent = "Saving...";
+      contactsResponded = false;
+      var qs = "?action=contacts&t=" + encodeURIComponent(token) +
+        "&osname="  + encodeURIComponent(pendingContacts.osName) +
+        "&osphone=" + encodeURIComponent(pendingContacts.osPhone) +
+        "&osext="   + encodeURIComponent(pendingContacts.osExt) +
+        "&osemail=" + encodeURIComponent(pendingContacts.osEmail) +
+        "&buname="  + encodeURIComponent(pendingContacts.buName) +
+        "&buphone=" + encodeURIComponent(pendingContacts.buPhone) +
+        "&buext="   + encodeURIComponent(pendingContacts.buExt) +
+        "&buemail=" + encodeURIComponent(pendingContacts.buEmail);
+      var script = document.createElement("script");
+      script.src = APPS_SCRIPT_URL + qs;
+      script.onerror = function () {
+        finishContacts(false, "We couldn't reach the service to save the contacts. Please try again.");
+      };
+      document.body.appendChild(script);
+      contactsTimer = setTimeout(function () {
+        finishContacts(false, "Saving the contacts took too long. Please try again.");
+      }, TIMEOUT_MS);
+    }
+    // JSONP callback from sendContactsJson on the server.
+    function handleContactsResponse(data) {
+      finishContacts(data.success, data.message);
+    }
+    function finishContacts(success, message) {
+      if (contactsResponded) return;
+      contactsResponded = true;
+      if (contactsTimer) clearTimeout(contactsTimer);
+      var btn = document.getElementById("closeBtn");
+      btn.disabled = false;
+      if (success) {
+        pendingContacts = null;
+        window.close();
+        setTimeout(function () {
+          btn.style.display = "none";
+          var note = document.getElementById("footerNote");
+          note.textContent = "Your contacts were saved. You may now close this tab.";
+          note.style.display = "block";
+        }, 300);
+      } else {
+        btn.textContent = "Submit and Close";
+        alert(message);
+      }
+    }
+
     function setState(cls, iconHtml, title, message, showClose) {
       var card = document.getElementById("card");
       card.className = "card " + cls;
