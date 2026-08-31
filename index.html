@@ -338,13 +338,11 @@
       var os = evaluateBlock("os");
       var bu = evaluateBlock("bu");
       // Surface format errors on any filled phone/email.
-      validateField("osPhone", "osPhoneErr", os.phoneOk);
-      validateField("osEmail", "osEmailErr", os.emailOk);
-      validateField("buPhone", "buPhoneErr", bu.phoneOk);
-      validateField("buEmail", "buEmailErr", bu.emailOk);
       // Surface the name + phone/email rule per block.
-      showComboError("os", os);
-      showComboError("bu", bu);
+      // Final gate: force = true shows every filled field's error (ignoring the
+      // live "looks finished" gating) so the user sees why Save is blocked.
+      renderBlockErrors("os", os, true);
+      renderBlockErrors("bu", bu, true);
       // Enforce: at least one complete block, and every filled block complete.
       var osOk = !os.filled || os.complete;
       var buOk = !bu.filled || bu.complete;
