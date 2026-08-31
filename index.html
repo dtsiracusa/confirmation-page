@@ -303,8 +303,8 @@
       else { input.classList.add("invalid"); err.classList.add("show"); }
       return valid;
     }
-    // Save validates only filled fields (no field is required), stores the
-    // values, then relabels the close button. It does NOT push yet (Option A).
+    // Save validates only filled fields (no field is required), then pushes the
+    // contacts to Monday.com and closes the tab in one step ("Save and Close").
     function saveContacts() {
       if (!document.getElementById("saveContactsBtn").classList.contains("active")) return;
       var osPhone = document.getElementById("osPhone").value.trim();
@@ -329,9 +329,7 @@
         buEmail: buEmail
       };
       closeContactsModal();
-      var closeBtn = document.getElementById("closeBtn");
-      closeBtn.textContent = "Submit and Close";
-      closeBtn.style.display = "inline-block";
+      subContactsAndClose();
     }
     // Pushes the saved contacts to Apps Script via JSONP, then closes the tab.
     var contactsResponded = false;
