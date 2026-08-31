@@ -69,6 +69,12 @@
     </div>
     <div class="card-body">
       <p id="message">Please click the button below to confirm your order with Wieland Healthcare.</p>
+      <div id="contactsButtonWrap" style="display:none; margin:12px 0;">
+        <button type="button" class="btn" id="addContactsBtn"
+                style="background:#1565c0; font-size:15px; padding:10px 24px;"
+                onclick="openContactsModal()">Add On-Site Contacts</button>
+      </div>
+      <p id="message2" style="display:none;"></p>
     </div>
     <div class="card-footer">
       <button class="btn" id="actionBtn" onclick="confirmOrder()">Confirm Order</button>
